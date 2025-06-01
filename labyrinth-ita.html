@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maze Explorer</title>
+  <style>
+    /* RESET & BASE STYLES */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      padding: 20px;
+    }
+    header, footer {
+      text-align: center;
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .controls button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      transition: background 0.3s;
+    }
+    .controls button:hover {
+      background: #0056b3;
+    }
+    #mazeCanvas {
+      display: block;
+      margin: 0 auto;
+      background: #e9f2f9;
+      border: 2px solid #333;
+    }
+    #message {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 1.2rem;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Maze Explorer</h1>
+  </header>
+  <div class="container">
+    <div class="controls">
+      <button onclick="newMaze()">Genera Nuovo Labirinto</button>
+      <button onclick="resetPath()">Resetta Percorso</button>
+      <p>
+        Usa i tasti W, A, S, D per tracciare il percorso (la linea blu).<br>
+        Il punto di <strong>Inizio</strong> è evidenziato in <span style="color:green; font-weight:bold;">verde</span> e il punto di <strong>Fine</strong> in <span style="color:red; font-weight:bold;">rosso</span>.
+      </p>
+    </div>
+    <canvas id="mazeCanvas" width="600" height="600"></canvas>
+    <div id="message"></div>
+  </div>
+  <footer>
+    Bocaletto Luca
+  </footer>
+  
+  <script>
+    "use strict";
+    /* -------- Variabili Globali e Costanti -------- */
+    const cols = 20;
+    const rows = 20;
+    const cellSize = 30; // Ciascuna cella: 30x30 pixel
+    let grid = [];
+    let current;         // per l'algoritmo del labirinto
+    let stack = [];
+    // Percorso tracciato dall'utente
+    let solutionPath = [];  // Array di oggetti {col, row}
+    // Punti di partenza e arrivo
+    const startCell = { col: 0, row: 0 };
+    const finishCell = { col: cols - 1, row: rows - 1 };
+    // Canvas e contesto
+    const canvas = document.getElementById("mazeCanvas");
+    const ctx = canvas.getContext("2d");
+    const messageEl = document.getElementById("message");
+    
+    /* -------- Classe Cell -------- */
+    class Cell {
+      constructor(col, row) {
+        this.col = col;
+        this.row = row;
+        this.walls = { top: true, right: true, bottom: true, left: true };
+        this.visited = false;
+      }
+      
+      draw() {
+        const x = this.col * cellSize;
+        const y = this.row * cellSize;
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        if (this.walls.top) {
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x + cellSize, y);
+          ctx.stroke();
+        }
+        if (this.walls.right) {
+          ctx.beginPath();
+          ctx.moveTo(x + cellSize, y);
+          ctx.lineTo(x + cellSize, y + cellSize);
+          ctx.stroke();
+        }
+        if (this.walls.bottom) {
+          ctx.beginPath();
+          ctx.moveTo(x + cellSize, y + cellSize);
+          ctx.lineTo(x, y + cellSize);
+          ctx.stroke();
+        }
+        if (this.walls.left) {
+          ctx.beginPath();
+          ctx.moveTo(x, y + cellSize);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        }
+      }
+      
+      highlight(color) {
+        const x = this.col * cellSize;
+        const y = this.row * cellSize;
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, cellSize, cellSize);
+      }
+    }
+    
+    /* -------- Creazione della Griglia -------- */
+    function createGrid() {
+      grid = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          grid.push(new Cell(c, r));
+        }
+      }
+    }
+    
+    function index(col, row) {
+      if (col < 0 || row < 0 || col >= cols || row >= rows) return -1;
+      return col + row * cols;
+    }
+    
+    /* -------- Generazione Labirinto con Backtracking -------- */
+    function generateMaze() {
+      createGrid();
+      current = grid[0];
+      current.visited = true;
+      stack = [];
+      
+      function step() {
+        let next = checkNeighbors(current);
+        if (next) {
+          next.visited = true;
+          stack.push(current);
+          removeWalls(current, next);
+          current = next;
+          drawMaze();
+          setTimeout(step, 5);
+        } else if (stack.length > 0) {
+          current = stack.pop();
+          drawMaze();
+          setTimeout(step, 5);
+        } else {
+          drawMaze();
+          // Quando il labirinto è generato, inizializza il percorso partendo da start.
+          solutionPath = [{ col: startCell.col, row: startCell.row }];
+          messageEl.innerText = "Usa W, A, S, D per tracciare il percorso.";
+          drawPlayerPath();
+        }
+      }
+      step();
+    }
+    
+    function checkNeighbors(cell) {
+      let neighbors = [];
+      const top = grid[index(cell.col, cell.row - 1)];
+      const right = grid[index(cell.col + 1, cell.row)];
+      const bottom = grid[index(cell.col, cell.row + 1)];
+      const left = grid[index(cell.col - 1, cell.row)];
+      if (top && !top.visited) neighbors.push(top);
+      if (right && !right.visited) neighbors.push(right);
+      if (bottom && !bottom.visited) neighbors.push(bottom);
+      if (left && !left.visited) neighbors.push(left);
+      if (neighbors.length > 0) {
+        const r = Math.floor(Math.random() * neighbors.length);
+        return neighbors[r];
+      } else {
+        return undefined;
+      }
+    }
+    
+    function removeWalls(a, b) {
+      const x = a.col - b.col;
+      const y = a.row - b.row;
+      if (x === 1) {
+        a.walls.left = false;
+        b.walls.right = false;
+      } else if (x === -1) {
+        a.walls.right = false;
+        b.walls.left = false;
+      }
+      if (y === 1) {
+        a.walls.top = false;
+        b.walls.bottom = false;
+      } else if (y === -1) {
+        a.walls.bottom = false;
+        b.walls.top = false;
+      }
+    }
+    
+    /* -------- Disegna il Labirinto -------- */
+    function drawMaze() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      grid.forEach(cell => cell.draw());
+      // Evidenzia il punto di Inizio in verde
+      grid[index(startCell.col, startCell.row)].highlight("lightgreen");
+      // Evidenzia il punto di Fine in rosso
+      grid[index(finishCell.col, finishCell.row)].highlight("red");
+      // Ridisegna il contorno delle celle start e finish
+      grid[index(startCell.col, startCell.row)].draw();
+      grid[index(finishCell.col, finishCell.row)].draw();
+      // Disegna il percorso tracciato
+      drawPlayerPath();
+    }
+    
+    /* -------- Gestione del Percorso -------- */
+    function drawPlayerPath() {
+      if (solutionPath.length > 1) {
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        for (let i = 0; i < solutionPath.length; i++) {
+          const { col, row } = solutionPath[i];
+          const x = col * cellSize + cellSize / 2;
+          const y = row * cellSize + cellSize / 2;
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        }
+        ctx.stroke();
+      }
+    }
+    
+    /* -------- Movimento con Tastiera (W, A, S, D) -------- */
+    // Usa "w" -> su, "a" -> sinistra, "s" -> giù, "d" -> destra.
+    document.addEventListener("keydown", function(e) {
+      const key = e.key.toLowerCase();
+      if (!["w", "a", "s", "d"].includes(key)) return;
+      // Evita lo scroll della pagina.
+      e.preventDefault();
+      
+      if (grid.length === 0) return;
+      const last = solutionPath[solutionPath.length - 1];
+      const curr = grid[index(last.col, last.row)];
+      let newPos = { col: last.col, row: last.row };
+      
+      if (key === "w") {
+        // Su
+        if (!curr.walls.top) newPos.row--;
+      } else if (key === "s") {
+        // Giù
+        if (!curr.walls.bottom) newPos.row++;
+      } else if (key === "a") {
+        // Sinistra
+        if (!curr.walls.left) newPos.col--;
+      } else if (key === "d") {
+        // Destra
+        if (!curr.walls.right) newPos.col++;
+      }
+      
+      if (newPos.col < 0 || newPos.row < 0 || newPos.col >= cols || newPos.row >= rows) return;
+      
+      // Se l'utente torna indietro (backtracking), rimuovi l'ultimo passo.
+      if (solutionPath.length > 1) {
+        const penultimate = solutionPath[solutionPath.length - 2];
+        if (penultimate.col === newPos.col && penultimate.row === newPos.row) {
+          solutionPath.pop();
+          drawMaze();
+          checkWin();
+          return;
+        }
+      }
+      
+      // Se la cella è già nel percorso, ignora per evitare cicli.
+      for (let cell of solutionPath) {
+        if (cell.col === newPos.col && cell.row === newPos.row) return;
+      }
+      
+      // Aggiungi la nuova posizione al percorso
+      solutionPath.push(newPos);
+      drawMaze();
+      checkWin();
+    });
+    
+    function resetPath() {
+      solutionPath = [{ col: startCell.col, row: startCell.row }];
+      drawMaze();
+      messageEl.innerText = "";
+    }
+    
+    /* -------- Controlla se l'Utente ha Vinto -------- */
+    function checkWin() {
+      const last = solutionPath[solutionPath.length - 1];
+      if (last.col === finishCell.col && last.row === finishCell.row) {
+        // Mostra un messaggio di completamento e chiedi se generare un nuovo labirinto o chiudere.
+        const playAgain = confirm("Complimenti, hai completato il labirinto!\nVuoi generare un nuovo labirinto? Clicca OK per nuovo labirinto o Annulla per chiudere la finestra.");
+        if (playAgain) {
+          newMaze();
+        } else {
+          window.close();
+        }
+      }
+    }
+    
+    /* -------- Funzione Nuovo Labirinto -------- */
+    function newMaze() {
+      messageEl.innerText = "Generazione del labirinto in corso...";
+      generateMaze();
+      // Aggiunge nuovamente il listener in caso di vittoria precedente.
+      document.addEventListener("keydown", function(e) {
+        const key = e.key.toLowerCase();
+        if (!["w", "a", "s", "d"].includes(key)) return;
+        e.preventDefault();
+      });
+    }
+    
+    /* -------- Esportazione in Immagine e PDF -------- */
+    // Scarica il contenuto del canvas come immagine
+    function downloadImage(format) {
+      const dataURL = canvas.toDataURL("image/" + format);
+      const link = document.createElement("a");
+      link.download = "maze." + (format === "jpeg" ? "jpg" : format);
+      link.href = dataURL;
+      link.click();
+    }
+    
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p", "pt", [canvas.width, canvas.height]);
+      const imgData = canvas.toDataURL("image/png");
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+      pdf.save("maze.pdf");
+    }
+    
+    /* -------- Avvio -------- */
+    newMaze();
+  </script>
+</body>
+</html>
