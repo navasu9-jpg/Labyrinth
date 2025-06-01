@@ -1,8 +1,8 @@
-# 🏆 Maze Explorer | Web Game 🚀  
+# 🏆 Labyrinth | Maze Explorer | Web Game 🚀  
 #### Author: Bocaletto Luca
 ---
 
-Welcome to **Maze Explorer**! 🎮  
+Welcome to **Labyrinth | Maze Explorer**! 🎮  
 This is a fun and interactive **web game** where players solve **randomly generated mazes** by tracing a **path** using the **W, A, S, D** keys. The maze is generated dynamically, and you can **save your solved maze as PNG, JPG, or PDF**.  
 
 ⭐ **GAME HIGHLIGHTS** ⭐  
@@ -97,7 +97,7 @@ If you'd like to contribute, feel free to submit **feature suggestions** or **pu
 **👨‍💻 Bocaletto Luca**  
 
 Made with ❤️ and **JavaScript**!  
-If you enjoy Maze Explorer, feel free to ⭐ star the repository or contribute to its development. 🚀  
+If you enjoy Labyrinth - Maze Explorer, feel free to ⭐ star the repository or contribute to its development. 🚀  
 
 ---
 
