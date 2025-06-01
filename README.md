@@ -14,7 +14,9 @@ This is a fun and interactive **web game** where players solve **randomly genera
 - 🎉 **Game Completion:** Dialog prompts a choice to start a **new maze** or **exit**  
 - 📤 **Export Options:** Save maze as **PNG, JPG, or PDF**  
 - 🛑 **Prevents Page Scrolling:** Moving with WASD does not scroll the page  
+---
 
+## Play GAME Online https://bocaletto-luca.github.io/Labyrinth/labyrinth.html
 ---
 
 ## 🎮 How to Play  
