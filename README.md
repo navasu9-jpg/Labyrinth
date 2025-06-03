@@ -16,7 +16,7 @@ This is a fun and interactive **web game** where players solve **randomly genera
 - 🛑 **Prevents Page Scrolling:** Moving with WASD does not scroll the page  
 ---
 
-## Play GAME Online https://bocaletto-luca.github.io/Labyrinth/labyrinth.html
+[![Test Online](https://img.shields.io/badge/Test%20Online-Click%20Here-brightgreen?style=for-the-badge)](https://bocaletto-luca.github.io/Labyrinth/)
 ---
 
 ## 🎮 How to Play  
