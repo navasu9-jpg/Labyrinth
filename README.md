@@ -2,6 +2,10 @@
 #### Author: Bocaletto Luca
 ---
 
+[![Test Online](https://img.shields.io/badge/Test%20Online-Click%20Here-brightgreen?style=for-the-badge)](https://bocaletto-luca.github.io/Labyrinth/)
+
+---
+
 Welcome to **Labyrinth | Maze Explorer**! 🎮  
 This is a fun and interactive **web game** where players solve **randomly generated mazes** by tracing a **path** using the **W, A, S, D** keys. The maze is generated dynamically, and you can **save your solved maze as PNG, JPG, or PDF**.  
 
@@ -14,9 +18,6 @@ This is a fun and interactive **web game** where players solve **randomly genera
 - 🎉 **Game Completion:** Dialog prompts a choice to start a **new maze** or **exit**  
 - 📤 **Export Options:** Save maze as **PNG, JPG, or PDF**  
 - 🛑 **Prevents Page Scrolling:** Moving with WASD does not scroll the page  
----
-
-[![Test Online](https://img.shields.io/badge/Test%20Online-Click%20Here-brightgreen?style=for-the-badge)](https://bocaletto-luca.github.io/Labyrinth/)
 ---
 
 ## 🎮 How to Play  
