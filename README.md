@@ -106,7 +106,7 @@ If you enjoy Labyrinth - Maze Explorer, feel free to ⭐ star the repository or 
 
 ## 🔗 License  
 
-This project is licensed under the **GPL License**.  
+This project is licensed under the **GPLv3 License**.  
 Feel free to use, modify, and distribute it **freely**! 😊  
 
 ---
