@@ -100,7 +100,32 @@ If you'd like to contribute, feel free to submit **feature suggestions** or **pu
 **👨‍💻 Bocaletto Luca**  
 
 Made with ❤️ and **JavaScript**!  
-If you enjoy Labyrinth - Maze Explorer, feel free to ⭐ star the repository or contribute to its development. 🚀  
+If you enjoy Labyrinth - Maze Explorer, feel free to ⭐ star the repository or contribute to its development. 🚀
+
+---
+
+## 🚀 Firebase Deployment
+
+Want to host the game on **Firebase Hosting**? Follow these quick steps:
+
+1. Install the Firebase CLI:
+   ```bash
+   npm install -g firebase-tools
+   ```
+2. Authenticate with your Google account:
+   ```bash
+   firebase login
+   ```
+3. Initialize the project (choose **Hosting** and set `public` to `.` when prompted):
+   ```bash
+   firebase init
+   ```
+4. Deploy the game:
+   ```bash
+   firebase deploy
+   ```
+
+The provided `firebase.json` and `.firebaserc` files are configured for a static site deployment. Replace `your-project-id` in `.firebaserc` with your Firebase project ID before deploying.
 
 ---
 
