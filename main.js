@@ -187,7 +187,7 @@
     }
     
     /* -------------------- Keyboard Movement using WASD -------------------- */
-    document.addEventListener("keydown", function(e) {
+    function handleKeyDown(e) {
       const key = e.key.toLowerCase();
       if (!["w", "a", "s", "d"].includes(key)) return;
       e.preventDefault();
@@ -229,7 +229,9 @@
       solutionPath.push(newPos);
       drawMaze();
       checkWin();
-    });
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
     
     function resetPath() {
       solutionPath = [{ col: startCell.col, row: startCell.row }];
@@ -257,12 +259,7 @@
       // Clear any previous solution path.
       solutionPath = [];
       generateMaze();
-      // Reattach the WASD key listener to prevent default scrolling.
-      document.addEventListener("keydown", function(e) {
-        const key = e.key.toLowerCase();
-        if (!["w", "a", "s", "d"].includes(key)) return;
-        e.preventDefault();
-      });
+      // The keydown listener is attached once globally, so no need to add it here.
     }
     
     /* -------------------- Export Functions -------------------- */
